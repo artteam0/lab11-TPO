@@ -22,19 +22,13 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Установить зависимости и запустить автотесты
+    - name: Установить зависимости
       run: |
-        # Находим папку, в которой физически лежит файл test_ui.py
-        TARGET_DIR=$(find . -name "test_ui.py" -exec dirname {} \; | head -n 1)
-        
-        echo "Файл тестов найден в директории: $TARGET_DIR"
-        
-        # Переходим в найденную папку
-        cd "$TARGET_DIR"
-        
-        # Устанавливаем зависимости и запускаем тесты прямо там
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
+    - name: Запустить автотесты
+      run: |
         pytest test_ui.py
 
   deploy:
