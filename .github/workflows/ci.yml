@@ -29,7 +29,7 @@ jobs:
 
     - name: Запустить автотесты
       run: |
-        pytest test_ui.py
+        pytest test.py
 
   deploy:
     needs: test
