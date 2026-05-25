@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: (Checkout)
+    - name: Проверить репозиторий (Checkout)
       uses: actions/checkout@v4
 
     - name: Настроить Python
@@ -22,27 +22,28 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Установить зависимости
-      working-directory: "./ТПО/lab11"
+    - name: Установить зависимости и запустить тесты
       run: |
+        # Ищем любую папку, где лежит test_ui.py, и переходим в неё
+        TARGET_DIR=$(find . -name "test_ui.py" -exec dirname {} \; | head -n 1)
+        if [ -n "$TARGET_DIR" ]; then
+          cd "$TARGET_DIR"
+        fi
+        
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-
-    - name: Запустить автотесты Selenium
-      working-directory: "./ТПО/lab11"
-      run: |
-        pytest test.py
+        pytest test_ui.py
 
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-    - name: (Checkout)
+    - name: Проверить репозиторий (Checkout)
       uses: actions/checkout@v4
 
     - name: Деплой на GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: "./ТПО/lab11"
+        publish_dir: ./
