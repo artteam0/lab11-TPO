@@ -1,0 +1,46 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, dev, fix ]
+  pull_request:
+    branches: [ main, dev ]
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+
+    - name: Python настройка
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: установка зависимостей
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: запуск автотестов Selenium
+      run: |
+        pytest test_ui.py
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+
+    - name: GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
