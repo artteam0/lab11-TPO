@@ -25,11 +25,15 @@ jobs:
     - name: Установить зависимости
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        # Ищем requirements.txt где бы он ни был и ставим
+        find . -name "requirements.txt" -exec pip install -r {} \;
 
     - name: Запустить автотесты
       run: |
-        pytest test.py
+        # Находим точную папку с нашим test.py, переходим туда и жестко гасим кэш
+        TARGET_DIR=$(find . -name "test.py" -exec dirname {} \; | head -n 1)
+        cd "$TARGET_DIR"
+        pytest test.py -o cache_dir=/dev/null
 
   deploy:
     needs: test
