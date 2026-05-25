@@ -14,32 +14,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: checkout
+    - name: Проверить репозиторий (Checkout)
       uses: actions/checkout@v4
 
-    - name: Python настройка
+    - name: Настроить Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
-    - name: установка зависимостей
+    - name: Установить зависимости
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        # Ищем requirements.txt где бы он ни был и ставим
+        find . -name "requirements.txt" -exec pip install -r {} \;
 
-    - name: запуск автотестов Selenium
+    - name: Запустить автотесты
       run: |
-        pytest test_ui.py
+        # Находим точную папку с нашим test.py, переходим туда и жестко гасим кэш
+        TARGET_DIR=$(find . -name "test.py" -exec dirname {} \; | head -n 1)
+        cd "$TARGET_DIR"
+        pytest test.py -o cache_dir=/dev/null
 
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
+    - name: Проверить репозиторий (Checkout)
       uses: actions/checkout@v4
 
-    - name: GitHub Pages
+    - name: Деплой на GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
